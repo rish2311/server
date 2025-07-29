@@ -6,7 +6,7 @@ const addProductReview = async (req, res) => {
   try {
     const { productId, userId, userName, reviewMessage, reviewValue } =
       req.body;
-
+console.log(productId, userId, userName, reviewMessage, reviewValue)
     const order = await Order.findOne({
       userId,
       "cartItems.productId": productId,
@@ -55,10 +55,11 @@ const addProductReview = async (req, res) => {
       data: newReview,
     });
   } catch (e) {
-    console.log(e);
+
+    console.log(e),
     res.status(500).json({
       success: false,
-      message: "Error",
+      message: "Error", e,
     });
   }
 };
@@ -73,7 +74,7 @@ const getProductReviews = async (req, res) => {
       data: reviews,
     });
   } catch (e) {
-    console.log(e);
+
     res.status(500).json({
       success: false,
       message: "Error",

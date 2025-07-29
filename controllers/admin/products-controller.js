@@ -12,7 +12,7 @@ const handleImageUpload = async (req, res) => {
       result,
     });
   } catch (error) {
-    console.log(error);
+
     res.json({
       success: false,
       message: "Error occured",
@@ -35,7 +35,23 @@ const addProduct = async (req, res) => {
       averageReview,
     } = req.body;
 
-    console.log(averageReview, "averageReview");
+    // Validate required fields
+    if (!title || !description || !category || !brand || !price || !totalStock) {
+      return res.status(400).json({
+        success: false,
+        message: "All required fields must be provided"
+      });
+    }
+    
+    // Validate data types
+    if (isNaN(price) || isNaN(totalStock) || price < 0 || totalStock < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Price and stock must be valid positive numbers"
+      });
+    }
+
+
 
     const newlyCreatedProduct = new Product({
       image,
@@ -55,7 +71,7 @@ const addProduct = async (req, res) => {
       data: newlyCreatedProduct,
     });
   } catch (e) {
-    console.log(e);
+
     res.status(500).json({
       success: false,
       message: "Error occured",
@@ -67,13 +83,28 @@ const addProduct = async (req, res) => {
 
 const fetchAllProducts = async (req, res) => {
   try {
-    const listOfProducts = await Product.find({});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    const listOfProducts = await Product.find({})
+      .skip(skip)
+      .limit(limit);
+    
+    const total = await Product.countDocuments();
+    
     res.status(200).json({
       success: true,
       data: listOfProducts,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (e) {
-    console.log(e);
+
     res.status(500).json({
       success: false,
       message: "Error occured",
@@ -121,7 +152,7 @@ const editProduct = async (req, res) => {
       data: findProduct,
     });
   } catch (e) {
-    console.log(e);
+
     res.status(500).json({
       success: false,
       message: "Error occured",
@@ -146,7 +177,7 @@ const deleteProduct = async (req, res) => {
       message: "Product delete successfully",
     });
   } catch (e) {
-    console.log(e);
+
     res.status(500).json({
       success: false,
       message: "Error occured",
